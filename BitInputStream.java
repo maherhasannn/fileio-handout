@@ -1,6 +1,8 @@
 
 // https://liveexample.pearsoncmg.com/liang/intro11e/html/TestObjectInputStream.html
+// referenced pg 683 from textbook
 
+import java.io.*;
 /**
  * reads a stream of bits from a file
  * @author maher hasan
@@ -9,13 +11,12 @@
 
 class BitInputStream extends Driver {
     private FileInputStream input;
-    private int curr;
-    private int storage;
+    private int currentByte;    // current byte being read from file
+    private int numBitsRemaining;  // number of bits remaining in current byte
 
-    public BitInputStream(File file) {
-        this.input = new FileInputStream(file);
-        this.curr = 0;
-        this.storage =0;
+    public BitInputStream(File file) throws FileNotFoundException{
+        input = new FileInputStream(file);
+        numBitsRemaining = 0;
     }
 
     /**
@@ -25,22 +26,37 @@ class BitInputStream extends Driver {
 
       Returns the number of bits available in the file
     */
-    public int available( ) {
-        return (this.input * 8) + storage;
+    public int available() throws IOException {
+        return input.available() * 8 + numBitsRemaining;
     }
 
     // Reads the next bit from the input stream.
-    public char readBit() {
-
+    public char readBit() throws IOException {
+        if (numBitsRemaining == 0) {
+            currentByte = input.read();
+            if (currentByte == -1) {
+                throw new EOFException("End of file reached");
+            }
+            numBitsRemaining = 8;
+        }
+        
+        char bit = (char) ((currentByte >> (numBitsRemaining - 1)) & 1);
+        numBitsRemaining--;
+        return bit;
     }
 
     //Reads the remainder of the file and returns the bit string.
-    public String readBits() {
-
+    public String readBits() throws IOException {
+        StringBuilder result = new StringBuilder();
+        int bit;
+        while ((bit = readBit()) != -1) {
+            result.append(bit);
+        }
+        return result.toString();
     }
 
     //This method must be invoked to close the stream
-    public void close() {
+    public void close() throws IOException {
         input.close();
     }
 }
