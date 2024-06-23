@@ -14,8 +14,9 @@ class BitInputStream extends Driver {
     private int currentByte;    // current byte being read from file
     private int numBitsRemaining;  // number of bits remaining in current byte
 
-    public BitInputStream(File file) throws FileNotFoundException{
+    public BitInputStream(File file) throws FileNotFoundException {
         input = new FileInputStream(file);
+        currentByte = 0;
         numBitsRemaining = 0;
     }
 
@@ -35,28 +36,48 @@ class BitInputStream extends Driver {
         if (numBitsRemaining == 0) {
             currentByte = input.read();
             if (currentByte == -1) {
-                throw new EOFException("End of file reached");
+                throw new EOFException("End of stream reached");
             }
             numBitsRemaining = 8;
         }
-        
-        char bit = (char) ((currentByte >> (numBitsRemaining - 1)) & 1);
+
         numBitsRemaining--;
-        return bit;
+        return (char) (((currentByte >> numBitsRemaining) & 1) + '0');
     }
+
+    
+    // public String readBits() throws IOException {
+    //     StringBuilder result = new StringBuilder();
+    //     int bit;
+    //     while ((bit = readBit()) != -1) {
+    //         result.append(bit);
+    //     }
+    //     return result.toString();
+    // }
 
     //Reads the remainder of the file and returns the bit string.
     public String readBits() throws IOException {
-        StringBuilder result = new StringBuilder();
-        int bit;
-        while ((bit = readBit()) != -1) {
-            result.append(bit);
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            try {
+                sb.append(readBit());
+            } catch (EOFException hgfhfdgdfsregfdgfdgdf) {
+                break;
+            }
         }
-        return result.toString();
+        return sb.toString();
     }
+
+
+
+
+
+
+
 
     //This method must be invoked to close the stream
     public void close() throws IOException {
         input.close();
     }
 }
+

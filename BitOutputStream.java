@@ -11,14 +11,10 @@ class BitOutputStream extends Driver{
     private int numBitsInCurr;
     
     public BitOutputStream(File file) throws FileNotFoundException {
-        try {
-            this.output = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            System.err.println("Error: File not found " + file);
-            throw e; 
-        }
-        this.currByte = 0;
-        this.numBitsInCurr = 0;
+        
+        output = new FileOutputStream(file);
+        currByte = 0;
+        numBitsInCurr = 0;
     }
 
 /**
@@ -31,9 +27,9 @@ class BitOutputStream extends Driver{
  *  Writes a bit '0' or '1' to the output stream
  */
     public void writeBit(char bit) throws IOException{
-        if (bit != '0' | bit != '1') {
-            throw new IllegalArgumentException("1 or 0");
-        }
+        // if (bit != '0' | bit != '1') {
+        //     throw new IllegalArgumentException("1 or 0");
+        // }
 
 
     /**
@@ -48,50 +44,35 @@ class BitOutputStream extends Driver{
      */
 
 
-        currByte = (currByte << 1);
-        currByte = currByte | (bit - '0');
+        currByte = (currByte << 1) | (bit - '0'); //shift bits to the left by 1
+
 
         numBitsInCurr++;
 
-        if (numBitsInCurr == 8) {
-            try {
-                output.write(currByte);
-            } catch (IOException e) {
-                System.err.println("Error writing to output stream");
-                throw e; // Re-throw the exception to be handled by the caller
-            }
-            numBitsInCurr = 0;
-            currByte = 0;
+        if (numBitsInCurr ==8) { // if true we have a full byte
+            output.write(currByte);
+            currByte =0;
+            numBitsInCurr =0;
         }
         
     } 
 
     // Writes a string of bits to the output stream
     public void writeBits(String bitString) throws IOException{
-        for (char bit : bitString.toCharArray()) {
-            writeBit(bit);
+        for (int i =0; i < bitString.length(); i++) {
+            writeBit(bitString.charAt(i));
         }
     }
 
     // This method must be invoked to close the stream
     public void close() throws IOException {
         if (numBitsInCurr > 0) {
-            currByte <<= (8 - numBitsInCurr);
-            try {
-                output.write(currByte);
-            } catch (IOException e) {
-                System.err.println("Error writing to output stream");
-                throw e; 
-            }
+            currByte <<= (8-numBitsInCurr);
+            output.write(currByte);
         }
-        try {
-            output.close();
-        } catch (IOException e) {
-            System.err.println("Error closing output stream");
-            throw e; 
-        }
-    }
 
-
+        output.close();
 
 }
+}
+
